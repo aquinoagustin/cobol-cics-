@@ -1,0 +1,31 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. PROG2.
+       ENVIRONMENT DIVISION.
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 WS-RESP  PIC S9(9) COMP.
+       01 WS-RESP2 PIC S9(9) COMP.
+       LINKAGE SECTION.
+       COPY PROGCOMM REPLACING COM-REGION BY DFHCOMMAREA.
+       PROCEDURE DIVISION.
+           IF EIBCALEN >= LENGTH OF DFHCOMMAREA THEN
+            EVALUATE TRUE
+             WHEN FIELD = 'ABC'
+              EXEC CICS SEND TEXT
+                        FROM(FIELD)
+                        LENGTH(LENGTH OF FIELD)
+                        ERASE
+                        RESP(WS-RESP)
+                        RESP2(WS-RESP2)
+              END-EXEC
+              IF WS-RESP NOT = DFHRESP(NORMAL)
+               DISPLAY 'PROG2 SEND ERR RESP=' WS-RESP 'RESP2=' WS-RESP2
+              END-IF
+              WHEN OTHER
+               DISPLAY 'PROG2: VALOR NO ESPERADO EN FIELD=' FIELD
+            END-EVALUATE
+           ELSE
+             DISPLAY 'PROG2: EIBCALEN INSUFICIENTE. EIBCALEN=' EIBCALEN
+                     'EIBCALEN ESPERADO =' LENGTH OF DFHCOMMAREA
+           END-IF.
+           EXEC CICS RETURN END-EXEC.
